@@ -5,13 +5,13 @@
 #include <time.h>
 #include <math.h>
 #include <conio.h>
+#include <limits>
 
 using namespace std;
 
 ifstream fin("date.txt");
 
-struct Coord
-{
+struct Coord{
     int x;
     int y;
 };
@@ -21,8 +21,7 @@ struct Rotation{
     int crash[100] = {-1};
 };
 
-struct Piesa
-{
+struct Piesa{
     Coord blocks[100];
     int symbol;
     int weight;
@@ -65,11 +64,10 @@ void loadPieces()
         piesa[i].symbol = 65+i;
         piesa[i].length = coordsCount;
 
-        for(int rot = 1; rot <= piesa[i].rotationLength; rot++)
-        {
-
+        for(int rot = 1; rot <= piesa[i].rotationLength; rot++){
 
             for(int c = 1; c <= coordsCount; c++){
+
                 fin>>piesa[i].rotation[rot].blocks[c].x;
                 fin>>piesa[i].rotation[rot].blocks[c].y;
 
@@ -78,31 +76,25 @@ void loadPieces()
 
                 if(y > piesa[i].weight)
                     piesa[i].weight = y;
-
             }
-
-
-
         }
-
         piesa[i].weight ++;
     }
 
     piecesAmount = nrPiese;
 }
 
-void findCrash(){
+void findCrash()
+{
     for(int i = 1; i <= piecesAmount; i++){
         for(int rot = 1; rot <= piesa[i].rotationLength; rot++){
             for(int c = 1; c <= piesa[i].length; c++){
+
                 int y = piesa[i].rotation[rot].blocks[c].y;
                 int x = piesa[i].rotation[rot].blocks[c].x;
 
-
-
-                if(y >= piesa[i].rotation[rot].crash[x]){
+                if(y >= piesa[i].rotation[rot].crash[x])
                     piesa[i].rotation[rot].crash[x] = y;
-                }
             }
         }
     }
@@ -111,20 +103,20 @@ void findCrash(){
 void drawGrid()
 {
     if(gameWorks){
-
         cout<<"Scor: "<<score<<endl;
         cout<<endl;
 
-        for(int i = 0; i <= height + 1; i++)
-        {
-            for(int j = 0; j <= weight + 1; j++)
-            {
+        for(int i = 0; i <= height + 1; i++){
+            for(int j = 0; j <= weight + 1; j++){
                 if(grid[i][j] == 0) cout<<" ";
                 else cout<<(char)grid[i][j];
             }
             cout<<endl;
         }
-    } else cout<<"Ai pierdut! :("<<endl;
+    } else {
+        cout<<"Ai pierdut! Scor total: "<<score<<endl;
+        cout<<"Apasa SPACE pentru a inchide jocul.";
+    }
 }
 
 void bordare()
@@ -133,23 +125,19 @@ void bordare()
         for(int j = 0; j <= weight + 1; j++)
             grid[i][j] = 0;
 
-    for(int i = 0; i <= height + 1; i++)
-    {
+    for(int i = 0; i <= height + 1; i++){
         grid[i][0] = 478;
         grid[i][weight + 1] = 477;
     }
 
-    for(int i = 0; i <= weight + 1; i++)
-    {
+    for(int i = 0; i <= weight + 1; i++){
         grid[0][i] = 476;
         grid[height + 1][i] = 479;
     }
 }
 
-void print()
-{
-    for(int i = 0; i <= height + 1; i++)
-    {
+void print(){
+    for(int i = 0; i <= height + 1; i++){
         for(int j = 0; j <= weight + 1; j++)
             cout<<grid[i][j]<<" ";
         cout<<endl;
@@ -157,8 +145,7 @@ void print()
 
 }
 
-void checkFilledRows()
-{
+void checkFilledRows(){
     for(int i = 2; i <= height; i++){
         int ok = true;
         for(int j = 1; j <= weight; j++)
@@ -171,14 +158,13 @@ void checkFilledRows()
             for(int j = 1; j <= weight; j++){
                 grid[p][j] = grid[p - 1][j];
 
-        }
+            }
         score++;
     }
 
 }
 
-bool checkFirstRow()
-{
+bool checkFirstRow(){
     for(int j = 1; j <= weight; j++)
         if(grid[1][j] != 0)
             return true;
@@ -187,17 +173,24 @@ bool checkFirstRow()
 
 
 
-void refresh()
-{
+void refresh(){
     drawGrid();
     Sleep(1000/(fps * movePerFrame));
     system("cls");
 }
 
+bool isHeld(char key){
+    return GetKeyState(key) & 0x8000;
+}
+
+bool isPressed(char key){
+    return GetAsyncKeyState(key) & 0x8000;
+}
 
 
-int main()
-{
+
+
+int main(){
 
     srand(time(NULL));
 
@@ -206,26 +199,16 @@ int main()
 
     findCrash();
 
-    //for(int i=0;i<=500;i++)
-    //    cout<<i<<" : "<<(char)i<<endl;
-
-    bool a = true;
-
-    while(a)
-    {
-
-        if(!gameWorks)
-        {
-
-            drawGrid();
-            getch();
+    do{
+        if(!gameWorks){
             refresh();
-
+            if(GetAsyncKeyState(VK_SPACE) & 0x8000){
+                break;
+                return 0;
+            }
         }
-        else
-        {
-            if(!falling)
-            {
+        else{
+            if(!falling){
                 falling = true;
 
                 int currentY = 1;
@@ -247,15 +230,10 @@ int main()
 
                 int refreshes = 0;
 
-                while(falling)
-                {
-
+                while(falling){
                     crash = false;
 
-
-
-
-                    if(GetKeyState('S') & 0x8000){
+                    if(isHeld('S')){
                         bool ok = true;
 
                         for(int index = 1; index <= piesa[nrPiesa].length; index++){
@@ -270,7 +248,7 @@ int main()
                             currentY ++;
                     }
 
-                    if(GetKeyState('D') & 0x8000){
+                    if(isHeld('D')){
                         bool ok = true;
 
                         for(int index = 1; index <= piesa[nrPiesa].length; index++){
@@ -284,7 +262,7 @@ int main()
                         if(ok)
                             currentX++;
                     }
-                    if(GetKeyState('A') & 0x8000){
+                    if(isHeld('A')){
                         bool ok = true;
 
                         for(int index = 1; index <= piesa[nrPiesa].length; index++){
@@ -300,8 +278,7 @@ int main()
 
                     }
 
-
-                    if(GetAsyncKeyState('R') & 0x8000){
+                    if(isPressed('R')){
                         if(!rotating){
                             bool ok = true;
                             int tempRot = currentRot;
@@ -322,23 +299,17 @@ int main()
                             if(ok) currentRot = tempRot;
                         }
 
-                    } else rotating = false;
+                    }
+                    else rotating = false;
 
                     refreshes++;
 
-
-
-
-                    for(int index = 1; index <= piesa[nrPiesa].length; index++)
-                    {
+                    for(int index = 1; index <= piesa[nrPiesa].length; index++){
 
                         int y = currentY + piesa[nrPiesa].rotation[currentRot].blocks[index].y;
                         int x = currentX + piesa[nrPiesa].rotation[currentRot].blocks[index].x;
 
-
-
                         grid[y][x] = piesa[nrPiesa].symbol;
-
 
                     }
 
@@ -350,21 +321,16 @@ int main()
                         int crashY = piesa[nrPiesa].rotation[currentRot].crash[defX] + 1;
 
 
-                        if(grid[currentY + crashY][x] != 0){
+                        if(grid[currentY + crashY][x] != 0)
                             crash = true;
-                        }
                     }
-
-
 
                     if(crash)  //piece crashes
                     {
 
-                        if(checkFirstRow())
-                        {
+                        if(checkFirstRow()){
                             gameWorks = false;
                             falling  = false;
-                            break;
                         }
 
                         checkFilledRows();
@@ -375,8 +341,7 @@ int main()
 
                     refresh();
 
-                    for(int index = 1; index <= piesa[nrPiesa].length; index++)
-                    {
+                    for(int index = 1; index <= piesa[nrPiesa].length; index++){
                         grid[currentY + piesa[nrPiesa].rotation[currentRot].blocks[index].y]
                         [currentX + piesa[nrPiesa].rotation[currentRot].blocks[index].x] = 0;
                     }
@@ -389,8 +354,7 @@ int main()
                 }
             }
         }
-
-    }
+    } while(true);
 
 
 
